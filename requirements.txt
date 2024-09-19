@@ -1,0 +1,16 @@
+nltk
+scikit-learn
+tensorflow-macos
+tensorflow-metal
+numpy
+pandas
+matplotlib
+pandas
+transformers
+datasets
+torchtext
+convokit
+torch
+torchvision
+torchaudio
+torchmetrics
