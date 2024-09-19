@@ -1,3 +1,4 @@
+import random
 import json
 from model import build_transformer, Transformer
 from data_model.chat_data_model import ChatDataModel, causal_mask
@@ -76,8 +77,9 @@ def run_validation(model: Transformer, validation_ds, tokenizer: Tokenizer, max_
 
             model_out = greedy_decode(model, encoder_input, encoder_mask, tokenizer, max_len, device)
 
-            source_text = batch["src_text"][0]
-            target_text = batch["tgt_text"][0]
+            rand_index = random.randint(0, len(batch['src_text']) - 1)
+            source_text = batch["src_text"][rand_index]
+            target_text = batch["tgt_text"][rand_index]
             model_out_text = tokenizer.decode(model_out.detach().cpu().numpy())
 
 
@@ -138,8 +140,10 @@ def get_or_build_tokenizer(config, ds):
 
 def get_ds(config):
     with open("./datasets/chat3.json", "r") as fl:
-        ds_raw = json.load(fl)['messages'][5000:10000]
+        ds_raw = json.load(fl)['messages']
     tokenizer = get_or_build_tokenizer(config, ds_raw)
+    ds_raw = ds_raw[:2500]
+    # ds_raw = ds_raw[:2500]
     # Keep 90% for training, 10% for validation
     train_ds_size = int(0.9 * len(ds_raw))
     val_ds_size = len(ds_raw) - train_ds_size
