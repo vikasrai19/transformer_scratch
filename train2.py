@@ -1,7 +1,7 @@
 import random
 import json
 from model import build_transformer, Transformer
-from data_model.chat_data_model import ChatDataModel, causal_mask
+from data_model.chat_data_model2 import ChatDataModel, causal_mask
 from config import get_config, get_weights_file, latest_weights_file_path
 
 import torch
@@ -14,6 +14,7 @@ from tqdm import tqdm
 import os
 from pathlib import Path
 
+from datasets import load_dataset
 from tokenizers import Tokenizer
 from tokenizers.models import WordLevel
 from tokenizers.trainers import WordLevelTrainer
@@ -23,6 +24,7 @@ import torchmetrics
 from torch.utils.tensorboard import SummaryWriter
 
 def greedy_decode(model : Transformer, source, mask, tokenizer: Tokenizer, max_len, device):
+    # print("model source ", tokenizer.decode(source))
     sos_idx = tokenizer.token_to_id("[SOS]")
     eos_idx = tokenizer.token_to_id("[EOS]")
     
@@ -119,8 +121,7 @@ def run_validation(model: Transformer, validation_ds, tokenizer: Tokenizer, max_
 def get_all_sentences(ds):
     all_sent = []
     for item in ds:
-        all_sent.append(item['user_input'])
-        all_sent.append(item['response'])
+        all_sent.append(item)
     for sent in all_sent:
         yield sent
 
@@ -138,14 +139,14 @@ def get_or_build_tokenizer(config, ds):
     return tokenizer
 
 def get_ds(config):
-    with open("./datasets/chat3.json", "r") as fl:
-        ds_raw = json.load(fl)['messages']
+    with open("./datasets/chat4.json", "r") as fl:
+        ds_raw = json.load(fl)
     tokenizer = get_or_build_tokenizer(config, ds_raw)
     # ds_raw = ds_raw
     # ds_raw = ds_raw[:2500]
     # Keep 90% for training, 10% for validation
     print(f'Length of dataset: {len(ds_raw)}')
-    train_ds_size = int(0.8 * len(ds_raw))
+    train_ds_size = int(0.9 * len(ds_raw))
     val_ds_size = len(ds_raw) - train_ds_size
     train_ds_raw, val_ds_raw = random_split(ds_raw, [train_ds_size, val_ds_size])
 
@@ -153,9 +154,9 @@ def get_ds(config):
     val_ds = ChatDataModel(val_ds_raw, tokenizer, config['seq_len'])
 
     max_len = 0
-    for item in ds_raw:
-        src_ids = tokenizer.encode(item['user_input']).ids
-        tgt_ids = tokenizer.encode(item['response']).ids
+    for idx in range(len(ds_raw) - 1):
+        src_ids = tokenizer.encode(ds_raw[idx]).ids
+        tgt_ids = tokenizer.encode(ds_raw[idx + 1]).ids
         max_len = max(max_len, len(src_ids))
         max_len = max(max_len, len(tgt_ids))
 
@@ -246,7 +247,8 @@ def train_model(config):
 
         try:
             run_validation(model, val_dataloader, tokenizer, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer, num_examples=4)
-        except Exception:
+        except Exception as e:
+            print("exception while running validation ", e)
             pass
 
 

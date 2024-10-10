@@ -9,9 +9,11 @@ def get_config():
         "seq_len": 200,
         "d_model": 512,
         "model_folder": "weights",
-        "model_basename": "chat_model_",
+        # "model_basename": "chat_model_1",
+        "model_basename": "chat_model_2",
         "preload":"latest",
-        "tokenizer_file": "tokenizer.json",
+        # "tokenizer_file": "tokenizer.json",
+        "tokenizer_file": "tokenizer2.json",
         "experiment_name": "runs/chat_model"
     }
 

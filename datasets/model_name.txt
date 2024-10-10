@@ -1,0 +1,2 @@
+Isotonic/human_assistant_conversation -> 1.49 million rows -> 2.11 GB
+void-32/EV-conversation -> 10.9 million rows -> 1.17GB
