@@ -23,6 +23,8 @@ from tokenizers.pre_tokenizers import Whitespace
 import torchmetrics
 from torch.utils.tensorboard import SummaryWriter
 
+max_sent_len = 0
+
 def greedy_decode(model : Transformer, source, mask, tokenizer: Tokenizer, max_len, device):
     # print("model source ", tokenizer.decode(source))
     sos_idx = tokenizer.token_to_id("[SOS]")
@@ -138,9 +140,14 @@ def get_or_build_tokenizer(config, ds):
         tokenizer = Tokenizer.from_file(str(tokenizer_path))
     return tokenizer
 
+
+
 def get_ds(config):
-    with open("./datasets/chat4.json", "r") as fl:
+    with open("./datasets/chat6.json", "r") as fl:
         ds_raw = json.load(fl)
+    size = int(0.2 * len(ds_raw))
+    ds_raw = ds_raw[:size]
+    
     tokenizer = get_or_build_tokenizer(config, ds_raw)
     # ds_raw = ds_raw
     # ds_raw = ds_raw[:2500]
@@ -150,9 +157,6 @@ def get_ds(config):
     val_ds_size = len(ds_raw) - train_ds_size
     train_ds_raw, val_ds_raw = random_split(ds_raw, [train_ds_size, val_ds_size])
 
-    train_ds = ChatDataModel(train_ds_raw, tokenizer, config['seq_len'])
-    val_ds = ChatDataModel(val_ds_raw, tokenizer, config['seq_len'])
-
     max_len = 0
     for idx in range(len(ds_raw) - 1):
         src_ids = tokenizer.encode(ds_raw[idx]).ids
@@ -160,7 +164,13 @@ def get_ds(config):
         max_len = max(max_len, len(src_ids))
         max_len = max(max_len, len(tgt_ids))
 
+    max_sent_len = max_len + 10
     print(f'Max length of sentence: {max_len}')
+
+    # train_ds = ChatDataModel(train_ds_raw, tokenizer, config['seq_len'])
+    # val_ds = ChatDataModel(val_ds_raw, tokenizer, config['seq_len'])
+    train_ds = ChatDataModel(train_ds_raw, tokenizer, max_sent_len)
+    val_ds = ChatDataModel(val_ds_raw, tokenizer, max_sent_len)
 
     train_dataloader = DataLoader(train_ds, batch_size=config['batch_size'], shuffle=False)
     val_dataloader = DataLoader(val_ds, batch_size=1, shuffle=False)
@@ -169,7 +179,8 @@ def get_ds(config):
 
 
 def get_model(config, vocab_size, device=None):
-    model = build_transformer(vocab_size, config['seq_len'], config['d_model'], device=device)
+    # model = build_transformer(vocab_size, config['seq_len'], config['d_model'], device=device)
+    model = build_transformer(vocab_size, max_sent_len, config['d_model'], device=device)
     return model
 
 
@@ -246,7 +257,8 @@ def train_model(config):
         }, model_filename)
 
         try:
-            run_validation(model, val_dataloader, tokenizer, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer, num_examples=4)
+            # run_validation(model, val_dataloader, tokenizer, config['seq_len'], device, lambda msg: batch_iterator.write(msg), global_step, writer, num_examples=4)
+            run_validation(model, val_dataloader, tokenizer, max_sent_len, device, lambda msg: batch_iterator.write(msg), global_step, writer, num_examples=4)
         except Exception as e:
             print("exception while running validation ", e)
             pass

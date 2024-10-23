@@ -7,6 +7,7 @@ def get_config():
         "num_epochs": 30,
         "lr": 10**-4,
         "seq_len": 200,
+        # "seq_len": 625,
         "d_model": 512,
         "model_folder": "weights",
         # "model_basename": "chat_model_1",
