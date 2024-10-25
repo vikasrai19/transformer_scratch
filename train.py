@@ -1,6 +1,6 @@
 import random
 import json
-from model import build_transformer, Transformer
+from model_2 import build_transformer, Transformer
 from data_model.chat_data_model import ChatDataModel, causal_mask
 from config import get_config, get_weights_file, latest_weights_file_path
 
