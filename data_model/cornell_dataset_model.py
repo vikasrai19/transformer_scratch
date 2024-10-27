@@ -81,7 +81,8 @@ class CornellDataset(Dataset):
         src, tgt = self.data[idx]
         src = pad_sequence(src, self.max_length)
         tgt = pad_sequence(tgt, self.max_length)
-        return torch.tensor(src), torch.tensor(tgt), torch.tensor(0)
+        domain = 0  # Set domain as 0 for Cornell dataset
+        return torch.tensor(src), torch.tensor(tgt), domain
 
 # Download and load the conversation dataset
 download_cornell_dataset()

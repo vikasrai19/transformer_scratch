@@ -2,3 +2,4 @@ tenv/
 __pycache__/
 runs/
 weights/
+models/

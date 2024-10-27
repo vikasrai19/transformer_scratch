@@ -48,7 +48,8 @@ class SQuADDataset(Dataset):
         src, tgt = self.data[idx]
         src = pad_sequence(src, self.max_length)
         tgt = pad_sequence(tgt, self.max_length)
-        return torch.tensor(src), torch.tensor(tgt), torch.tensor(1)
+        domain = 1  # Set domain as 0 for Cornell dataset
+        return torch.tensor(src), torch.tensor(tgt), domain
 
 # Load the QA dataset
 qa_data = load_squad_dataset()

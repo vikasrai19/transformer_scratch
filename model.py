@@ -157,9 +157,13 @@ class Decoder(nn.Module):
 
 # Domain-Specific Projection Layers
 class ProjectionLayer(nn.Module):
-    def __init__(self, d_model, vocab_size):
+    def __init__(self, d_model, vocab_sizes):
         super().__init__()
-        self.proj = nn.Linear(d_model, vocab_size)
+        self.projections = nn.ModuleDict({
+            domain: nn.Linear(d_model, vocab_size) for domain, vocab_size in vocab_sizes.items()
+        })
+        # self.proj = nn.Linear(d_model, vocab_size)
 
-    def forward(self, x):
-        return self.proj(x)
+    def forward(self, x, domain):
+        return self.projections[domain](x)
+        # return self.proj(x)
