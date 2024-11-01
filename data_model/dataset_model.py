@@ -1,3 +1,4 @@
+import json
 import nltk
 import zipfile
 import torch
@@ -35,17 +36,24 @@ def download_cornell_dataset(retries=10, delay=5):
 # Load and preprocess the conversation data
 def load_conversation_dataset():
     file_path = "cornell_movie_data/cornell movie-dialogs corpus/movie_lines.txt"
-    conversations = []
-    with open(file_path, 'r', encoding='iso-8859-1') as f:
-        for line in f.readlines():
-            parts = line.strip().split(" +++$+++ ")
-            if len(parts) == 5:
-                conversations.append((parts[3], parts[4]))  # Extract conversation pair
+    # file_path = "cornell_movie_data/cornell movie-dialogs corpus/movie_lines.txt"
+    # conversations = []
+    # with open(file_path, 'r', encoding='iso-8859-1') as f:
+    #     for line in f.readlines():
+    #         parts = line.strip().split(" +++$+++ ")
+    #         if len(parts) == 5:
+    #             conversations.append((parts[3], parts[4]))  # Extract conversation pair
 
+    file_path = "datasets/chatbot_dataset.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
+        print("data type ", type(data))
     final_conversation = []
-    for i in range(len(conversations) - 1):
-        if len(conversations[i][1]) < 200 and len(conversations[i + 1][1]) < 200:
-            final_conversation.append((conversations[i][1], conversations[i + 1][1]))
+    for i in range(len(data) - 1):
+        if len(data[i]['source']) < 200 and len(data[i]['response']) < 200:
+            final_conversation.append((data[i]['source'], data[i]['response']))
+        # if len(conversations[i][1]) < 200 and len(conversations[i + 1][1]) < 200:
+        #     final_conversation.append((conversations[i][1], conversations[i + 1][1]))
 
     return final_conversation
 
@@ -133,7 +141,7 @@ class TransformerDataLoader(Dataset):
         }
         # return encoder_input, decoder_input
 
-conv_len = int(0.01 * len(conv))
+conv_len = int(0.1 * len(conv))
 final_conv = conv[:conv_len]
 
 train_ds_size = int(0.8 * len(final_conv))

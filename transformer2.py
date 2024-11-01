@@ -97,7 +97,7 @@ def greedy_decode(model : Transformer, source, mask, max_len, device):
 def decode_text(data):
     words = []
     for d in data:
-        words.append(idx_to_word(d))
+        words.append(idx_to_word[d])
     return " ".join(words)
 
 def run_validation(model: Transformer, validation_ds, max_len, device, print_msg, global_step, writer, num_examples=2):
