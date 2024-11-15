@@ -1,32 +1,21 @@
-import os
 from pathlib import Path
 
-def get_config():
+def get_config(): 
     return {
-        "batch_size": 8,
-        "num_epochs": 30,
-        "lr": 10**-4,
-        "seq_len": 200,
-        "d_model": 512,
-        "model_folder": "weights",
-        "model_basename": "chat_model_",
-        "preload":"latest",
+        'batch_size': 8,
+        "num_epochs": 5,
+        "lr": 1e-7,
+        "seq_len"  : 200,
+        "d_model": 128,
+        "model_foldername": "weights",
+        "model_name": "transfomer_model2.pt",
+        "preload": None,
         "tokenizer_file": "tokenizer.json",
-        "experiment_name": "runs/chat_model"
+        "experiment_name": "runs/tmodel",
     }
 
-def get_weights_file(config, epoch):
-    model_folder = f'{config["model_folder"]}'
-    # model_filename = f'{config["model_basename"]}{epoch}.pt'
-    model_filename = f'{config["model_basename"]}.pt'
-    return str(Path('.') / model_folder / model_filename)
 
-def latest_weights_file_path(config):
-    model_folder = f'{config["model_folder"]}'
-    model_filename = f'{config["model_basename"]}*'
-    weight_files = list(Path(model_folder).glob(model_filename))
-    if len(weight_files) == 0:
-        return None
-    
-    weight_files.sort()
-    return str(weight_files[-1])
+def get_weights_file_path(config):
+    model_folder = config['model_foldername']
+    model_name = config['model_name']
+    return str(Path('.') / model_folder / model_name)
